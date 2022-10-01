@@ -1,0 +1,50 @@
+.custom-cursor-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  pointer-events: none;
+}
+
+.custom-cursor-container.pointer .custom-cursor {
+  display: none;
+}
+
+.custom-cursor-container.pointer .custom-pointer {
+  display: block;
+}
+
+.custom-cursor-container .custom-cursor {
+  display: block;
+}
+
+.custom-cursor-container .custom-pointer {
+  display: none;
+}
+
+.App .custom-cursor {
+  fill: #1e1e43;
+  background-blend-mode: difference;
+  transform: translate(-25%, -25%);
+  transition: fill 450ms;
+  filter: drop-shadow(0 0 15px #1e1e43);
+}
+
+.App .custom-pointer {
+  fill: #1e1e43;
+  background-blend-mode: difference;
+  transform-origin: bottom;
+  transform: translate(-25%, -50%) rotate(-25deg);
+  transition: fill 450ms;
+  filter: drop-shadow(0 0 15px #1e1e43);
+}
+
+.App.dark .custom-cursor {
+  fill: #6ff3f5;
+  filter: drop-shadow(0 0 10px #6ff3f5);
+}
+
+.App.dark .custom-pointer {
+  fill: #6ff3f5;
+  filter: drop-shadow(0 0 10px #6ff3f5);
+}

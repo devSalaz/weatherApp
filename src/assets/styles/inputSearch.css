@@ -1,0 +1,50 @@
+.input-search {
+  width: 600px;
+}
+
+.App .css-1pahdxg-control {
+  border-color: #6ff3f5 !important;
+  box-shadow: 0 0 0 1px #6ff3f5 !important;
+}
+
+.App .input-search .css-1s2u09g-control {
+  border-color: #1e1e43;
+}
+
+.App .input-search .css-1s2u09g-control:focus {
+  /* border-color: red; */
+}
+
+.App.dark .input-search .css-1s2u09g-control {
+  border-color: #fff;
+}
+
+.App .input-search input,
+.App .input-search .css-qc6sy-singleValue {
+  color: #1e1e43 !important;
+  font-family: "Outfit", sans-serif !important;
+  font-weight: 500 !important;
+}
+
+.App .css-14el2xx-placeholder {
+  color: #1e1e43 !important;
+  font-family: "Outfit", sans-serif !important;
+  font-weight: 300 !important;
+}
+
+.App .css-tlfecz-indicatorContainer {
+  color: #1e1e43 !important;
+}
+.App .css-1okebmr-indicatorSeparator {
+  background-color: #1e1e43 !important;
+}
+
+.App .css-at12u2-loadingIndicator {
+  color: #1e1e43 !important;
+}
+
+.App .css-4ljt47-MenuList div {
+  color: #1e1e43 !important;
+  font-family: "Outfit", sans-serif !important;
+  font-weight: 300 !important;
+}
