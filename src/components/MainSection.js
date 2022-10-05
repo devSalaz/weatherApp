@@ -19,7 +19,6 @@ const MainSection = ({ currentWeather, setIsCursorHover }) => {
       minute: "2-digit",
       hour12: true,
     });
-
     return hour;
   };
 

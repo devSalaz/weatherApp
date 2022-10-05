@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 import "./assets/styles/globalStyles.css";
 
 import Navbar from "./components/Navbar";
 import MainSection from "./components/MainSection";
 import CustomCursor from "./components/CustomCursor";
+import ThreeComponent from "./components/ThreeComponent";
 
 import { WEATHER_API_URL, WEATHER_API_KEY } from "./Api";
 
@@ -33,9 +34,7 @@ function App() {
 
   useEffect(() => {}, [isDarkMode]);
 
-  useEffect(() => {
-    console.log(currentWeather);
-  }, [currentWeather]);
+  useEffect(() => {}, [currentWeather]);
 
   return (
     <div
@@ -55,6 +54,7 @@ function App() {
           setIsCursorHover={setIsCursorHover}
         />
       )}
+      <ThreeComponent isDarkMode={isDarkMode} currentWeather={currentWeather} />
     </div>
   );
 }
