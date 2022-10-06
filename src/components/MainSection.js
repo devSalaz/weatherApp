@@ -1,13 +1,18 @@
 import React from "react";
+import { useRef } from "react";
+import { motion } from "framer-motion";
 
 import "../assets/styles/mainSection.css";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
+import { displayCurrentWeatherIcon } from "./ShowRandomMessage";
 
 import { Autoplay } from "swiper";
 
-const MainSection = ({ currentWeather, setIsCursorHover }) => {
+const MainSection = ({ currentWeather, setIsCursorHover, isThreeLoaded }) => {
+  const randomMessageRef = useRef();
+  const constraintsRef = useRef();
   const getLocalTime = (timezone, dt) => {
     const dateTime = new Date(dt * 1000);
     const toUtc = dateTime.getTime() + dateTime.getTimezoneOffset() * 60000;
@@ -23,18 +28,48 @@ const MainSection = ({ currentWeather, setIsCursorHover }) => {
   };
 
   return (
-    <div className="main-container">
+    <motion.div
+      animate={{ opacity: isThreeLoaded ? 1 : 0 }}
+      initial={{ opacity: 0 }}
+      transition={{ delay: 1 }}
+      className="main-container"
+    >
       <h3 className="city-name">
         {currentWeather.name}, {currentWeather.sys.country}
       </h3>
-      <h3 className="degree">{Math.round(currentWeather.main.temp)}°</h3>
-      <h3
-        className="timing-title"
-        onMouseEnter={() => setIsCursorHover(true)}
-        onMouseLeave={() => setIsCursorHover(false)}
+      <motion.h3
+        ref={constraintsRef}
+        drag
+        dragConstraints={constraintsRef}
+        className="degree"
+        onMouseEnter={() => {
+          setIsCursorHover(true);
+        }}
+        onMouseLeave={() => {
+          setIsCursorHover(false);
+        }}
       >
-        {currentWeather.weather[0].description}
-      </h3>
+        {Math.round(currentWeather.main.temp)}°
+      </motion.h3>
+      <div className="timing-title-container">
+        <div className="timing-random-message" ref={randomMessageRef}>
+          {displayCurrentWeatherIcon(currentWeather.weather[0].icon)}
+        </div>
+        <h3
+          className="timing-title"
+          onMouseEnter={() => {
+            setIsCursorHover(true);
+            randomMessageRef.current.classList.add("show");
+          }}
+          onMouseLeave={() => {
+            setIsCursorHover(false);
+            randomMessageRef.current.classList.remove("show");
+          }}
+        >
+          {currentWeather.weather[0].description}
+        </h3>
+      </div>
+
       <div className="container-info">
         <Swiper
           spaceBetween={50}
@@ -86,7 +121,7 @@ const MainSection = ({ currentWeather, setIsCursorHover }) => {
           </SwiperSlide>
         </Swiper>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

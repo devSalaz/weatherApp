@@ -6,6 +6,8 @@ import Navbar from "./components/Navbar";
 import MainSection from "./components/MainSection";
 import CustomCursor from "./components/CustomCursor";
 import ThreeComponent from "./components/ThreeComponent";
+import LoadingExample from "./components/loadingExample";
+import { customCity } from "./utilities/CustomCityData";
 
 import { WEATHER_API_URL, WEATHER_API_KEY } from "./Api";
 
@@ -14,8 +16,10 @@ function App() {
   const [currentWeather, setCurrentWeather] = useState(null);
   const [cursorPos, setCursorPos] = useState([0, 0]);
   const [isCursorHover, setIsCursorHover] = useState(false);
+  const [isThreeLoaded, setIsThreeLoaded] = useState(false);
 
   const handleOnSearchChange = (searchData) => {
+    console.log(searchData);
     const [lat, lon] = searchData.value.split(" ");
 
     fetch(
@@ -32,6 +36,12 @@ function App() {
     setCursorPos([x, y]);
   };
 
+  useEffect(() => {
+    handleOnSearchChange(
+      customCity[Math.round(Math.random() * (customCity.length - 1))]
+    );
+  }, []);
+
   useEffect(() => {}, [isDarkMode]);
 
   useEffect(() => {}, [currentWeather]);
@@ -41,6 +51,7 @@ function App() {
       className={`App ${isDarkMode ? "dark" : ""}`}
       onMouseMove={(e) => onMouseMoveHandler(e)}
     >
+      <LoadingExample isThreeLoaded={isThreeLoaded} />
       <CustomCursor cursorPos={cursorPos} isCursorHover={isCursorHover} />
       <Navbar
         isDarkMode={isDarkMode}
@@ -52,9 +63,15 @@ function App() {
         <MainSection
           currentWeather={currentWeather}
           setIsCursorHover={setIsCursorHover}
+          isThreeLoaded={isThreeLoaded}
         />
       )}
-      <ThreeComponent isDarkMode={isDarkMode} currentWeather={currentWeather} />
+      <ThreeComponent
+        isDarkMode={isDarkMode}
+        currentWeather={currentWeather}
+        setIsThreeLoaded={setIsThreeLoaded}
+        isThreeLoaded={isThreeLoaded}
+      />
     </div>
   );
 }

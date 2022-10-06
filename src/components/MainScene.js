@@ -2,6 +2,9 @@ import * as THREE from "three";
 
 import CamParallax from "../utilities/CamParallax";
 import Watch from "./Watch";
+import WeatherBehavior from "../components/WeatherBehaviour";
+
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 class MainScene {
   constructor() {
@@ -20,17 +23,41 @@ class MainScene {
     this.clock = new THREE.Clock();
   }
 
-  init(canvasContainer) {
+  init(canvasContainer, setIsThreeLoaded) {
+    this.setIsThreeLoaded = setIsThreeLoaded;
+    console.log(this.setIsThreeLoaded);
     this.customCursor = document.querySelector(".custom-cursor-container");
     this.camera.position.set(0, 0, 15);
     this.scene.add(this.camera);
-    CamParallax.init(this.camera);
     canvasContainer.appendChild(this.renderer.domElement);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    Watch.init(this.scene, this.camera, this.customCursor);
+    CamParallax.init(this.camera);
 
     window.addEventListener("resize", this.resizeCanvas);
+    this.addingElementsToScene();
     this.update();
+  }
+
+  addingElementsToScene() {
+    const loadingManager = new THREE.LoadingManager(
+      // Loaded
+      () => {
+        window.setTimeout(() => {
+          this.setIsThreeLoaded(true);
+        }, 5000);
+      },
+      // Progress
+      () => {}
+    );
+    const gltfLoader = new GLTFLoader(loadingManager);
+    const textureLoader = new THREE.TextureLoader(loadingManager);
+    Watch.init(
+      this.scene,
+      this.camera,
+      this.customCursor,
+      gltfLoader,
+      textureLoader
+    );
   }
 
   resizeCanvas() {
@@ -52,12 +79,15 @@ class MainScene {
   }
 
   onWeatherChanged(currentWeather) {
-    console.log(currentWeather);
     Watch.updateWatchHandles(currentWeather);
+    WeatherBehavior.onWeatherChanged(currentWeather);
   }
 
   bind() {
     this.init = this.init.bind(this);
+    this.onWeatherChanged = this.onWeatherChanged.bind(this);
+    this.addingElementsToScene = this.addingElementsToScene.bind(this);
+    this.onDarkModeChanged = this.onDarkModeChanged.bind(this);
     this.update = this.update.bind(this);
     this.resizeCanvas = this.resizeCanvas.bind(this);
   }

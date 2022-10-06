@@ -18,18 +18,18 @@ import PerlinNoise from "../assets/shaders/utils/PerlinNoise";
 class Watch {
   constructor() {
     this.bind();
-    this.modelLoader = new GLTFLoader();
-    this.textureLoader = new THREE.TextureLoader();
   }
 
-  init(scene, camera, customCursor) {
+  init(scene, camera, customCursor, gltfLoader, textureLoader) {
     this.customCursor = customCursor;
     this.time = 0;
     this.scene = scene;
     this.camera = camera;
     this.watch = 0;
     this.isWatchLoaded = false;
-    this.gui = new dat.GUI();
+    this.modelLoader = gltfLoader;
+    this.textureLoader = textureLoader;
+    //this.gui = new dat.GUI();
     this.setupMaterials();
     this.loadModel();
     this.groupObjects = [];
@@ -40,7 +40,6 @@ class Watch {
     this.currentMinutes = 0;
     window.addEventListener("click", this.onClickHandler, false);
     window.addEventListener("mousemove", this.onMouseMoveHandler, false);
-    this.bind();
   }
 
   onMouseMoveHandler(event) {
@@ -71,7 +70,6 @@ class Watch {
 
       if (intersects.length) {
         let intersectedName = intersects[0].object.name;
-        console.log(intersectedName);
         this.customCursor.classList.add("pointer");
 
         if (intersectedName === "Watch") {
@@ -126,7 +124,6 @@ class Watch {
     });
 
     this.watchMaterial.onBeforeCompile = (shader) => {
-      console.log(shader.vertexShader);
       shader.uniforms.uWatchValue = this.constWatchUniforms.uWatchValue;
       shader.uniforms.uMatcap1 = { value: textureLavaMatcap };
       shader.uniforms.uMatcap2 = { value: textureToonGreenMatcap };
@@ -182,19 +179,19 @@ class Watch {
       );
     };
 
-    this.gui
-      .add(this.constWatchUniforms.uStep, "value")
-      .min(-2)
-      .max(2)
-      .step(0.01)
-      .name("step");
+    // this.gui
+    //   .add(this.constWatchUniforms.uStep, "value")
+    //   .min(-2)
+    //   .max(2)
+    //   .step(0.01)
+    //   .name("step");
 
-    this.gui
-      .add(this.constWatchUniforms.uChangeY, "value")
-      .min(-2)
-      .max(2)
-      .step(0.01)
-      .name("uChangeY");
+    // this.gui
+    //   .add(this.constWatchUniforms.uChangeY, "value")
+    //   .min(-2)
+    //   .max(2)
+    //   .step(0.01)
+    //   .name("uChangeY");
 
     this.watchHandleMaterial = new THREE.MeshMatcapMaterial({
       matcap: textureLavaMatcap,
@@ -241,18 +238,18 @@ class Watch {
               fragmentShader: ShaderFragment,
               wireframe: false,
             });
-            this.gui
-              .add(this.shaderMat.uniforms.uStep, "value")
-              .min(-1.2)
-              .max(1.2)
-              .step(0.01);
+            // this.gui
+            //   .add(this.shaderMat.uniforms.uStep, "value")
+            //   .min(-1.2)
+            //   .max(1.2)
+            //   .step(0.01);
 
-            this.gui
-              .add(this.shaderMat.uniforms.uChangeY, "value")
-              .min(-5)
-              .max(5)
-              .step(0.01)
-              .name("shaderUChangeY");
+            // this.gui
+            //   .add(this.shaderMat.uniforms.uChangeY, "value")
+            //   .min(-5)
+            //   .max(5)
+            //   .step(0.01)
+            //   .name("shaderUChangeY");
 
             child.material = this.watchMaterial;
             this.groupObjects.push(child);
@@ -265,7 +262,7 @@ class Watch {
           }
         }
       });
-      this.gui.add(this.watch.position, "y", -6, 3, 0.01);
+      //this.gui.add(this.watch.position, "y", -6, 3, 0.01);
       this.watch.position.y = -4.5;
       this.watch.scale.normalize();
       this.watch.scale.set(5, 5, 5);
@@ -285,7 +282,7 @@ class Watch {
           ease: "easeOut",
         });
         gsap.to(this.constWatchUniforms.uChangeY, {
-          duration: 1.5,
+          duration: 1.0,
           value: -2,
           ease: "easeOut",
         });
@@ -300,7 +297,7 @@ class Watch {
           ease: "easeOut",
         });
         gsap.to(this.constWatchUniforms.uChangeY, {
-          duration: 1.5,
+          duration: 1.0,
           value: 2,
           ease: "easeOut",
         });

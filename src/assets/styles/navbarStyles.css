@@ -13,6 +13,8 @@ nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: relative;
+  z-index: 900;
 }
 
 .App .nav-title {

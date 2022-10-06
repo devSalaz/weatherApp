@@ -1,15 +1,20 @@
 import React from "react";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
+import { motion } from "framer-motion";
 
 import "../assets/styles/threeComponent.css";
 
 import MainScene from "../components/MainScene";
 
-const ThreeComponent = ({ isDarkMode, currentWeather, setIsCursorHover }) => {
+const ThreeComponent = ({
+  isDarkMode,
+  currentWeather,
+  setIsThreeLoaded,
+  isThreeLoaded,
+}) => {
   const refContainer = useRef(null);
-
   useEffect(() => {
-    MainScene.init(refContainer.current);
+    MainScene.init(refContainer.current, setIsThreeLoaded);
   }, []);
 
   useEffect(() => {
@@ -17,11 +22,18 @@ const ThreeComponent = ({ isDarkMode, currentWeather, setIsCursorHover }) => {
   }, [isDarkMode]);
 
   useEffect(() => {
-    console.log("Weather has changed");
     MainScene.onWeatherChanged(currentWeather);
   }, [currentWeather]);
 
-  return <div ref={refContainer} className="canvas-container"></div>;
+  return (
+    <motion.div
+      animate={{ filter: isThreeLoaded ? "blur(0px)" : "blur(4px)" }}
+      initial={{ filter: "blur(4px)" }}
+      transition={{ duration: 1, delay: 0.75 }}
+      ref={refContainer}
+      className="canvas-container"
+    ></motion.div>
+  );
 };
 
 export default ThreeComponent;
