@@ -25,12 +25,13 @@ class MainScene {
 
   init(canvasContainer, setIsThreeLoaded) {
     this.setIsThreeLoaded = setIsThreeLoaded;
-    console.log(this.setIsThreeLoaded);
     this.customCursor = document.querySelector(".custom-cursor-container");
-    this.camera.position.set(0, 0, 15);
+    this.camera.position.set(0, 1, 25);
+    this.camera.lookAt(0, 0, 0);
     this.scene.add(this.camera);
     canvasContainer.appendChild(this.renderer.domElement);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
+    //this.renderer.outputEncoding = THREE.sRGBEncoding;
     CamParallax.init(this.camera);
 
     window.addEventListener("resize", this.resizeCanvas);
@@ -44,7 +45,8 @@ class MainScene {
       () => {
         window.setTimeout(() => {
           this.setIsThreeLoaded(true);
-        }, 5000);
+          this.managerIsLoaded();
+        }, 3000);
       },
       // Progress
       () => {}
@@ -58,6 +60,10 @@ class MainScene {
       gltfLoader,
       textureLoader
     );
+  }
+
+  managerIsLoaded() {
+    Watch.showWatchAnim();
   }
 
   resizeCanvas() {
@@ -86,6 +92,7 @@ class MainScene {
   bind() {
     this.init = this.init.bind(this);
     this.onWeatherChanged = this.onWeatherChanged.bind(this);
+    this.managerIsLoaded = this.managerIsLoaded.bind(this);
     this.addingElementsToScene = this.addingElementsToScene.bind(this);
     this.onDarkModeChanged = this.onDarkModeChanged.bind(this);
     this.update = this.update.bind(this);

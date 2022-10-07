@@ -8,7 +8,7 @@ import ShaderFragment from "../assets/shaders/Watch/fragmentShader";
 
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
-import WatchModel from "../assets/models/alarm_clock5.glb";
+import WatchModel from "../assets/models/alarm_clock8.glb";
 import MatcapOrangeLava from "../assets/matcaps/orangeLava-matcap.jpg";
 import MatcapGreenToon from "../assets/matcaps/lightGreenToon-matcap.jpg";
 import MatcapGrey from "../assets/matcaps/greyMatcap.jpg";
@@ -29,7 +29,7 @@ class Watch {
     this.isWatchLoaded = false;
     this.modelLoader = gltfLoader;
     this.textureLoader = textureLoader;
-    //this.gui = new dat.GUI();
+    this.gui = new dat.GUI();
     this.setupMaterials();
     this.loadModel();
     this.groupObjects = [];
@@ -72,19 +72,19 @@ class Watch {
         let intersectedName = intersects[0].object.name;
         this.customCursor.classList.add("pointer");
 
-        if (intersectedName === "Watch") {
+        if (intersectedName === "watch") {
           const t1 = new TimelineMax({ ease: "bounce" });
           t1.to(this.watch.scale, {
             duration: 0.2,
-            x: 2,
-            y: 9,
-            z: 2,
+            x: 0.5,
+            y: 1.8,
+            z: 1.2,
           });
           t1.to(this.watch.scale, {
             duration: 0.2,
-            x: 5,
-            y: 5,
-            z: 5,
+            x: 1,
+            y: 1,
+            z: 1,
           });
         } else if (intersectedName === "handleWatch1") {
           this.currentHour -= -Math.PI * 2;
@@ -105,6 +105,22 @@ class Watch {
     }
   }
 
+  showWatchAnim() {
+    gsap.to(this.constWatchUniforms.uAlpha, {
+      duration: 2,
+      value: 1,
+      ease: "linear",
+      delay: 2,
+    });
+
+    gsap.to(this.constWatchUniforms.uAlphaHandle, {
+      duration: 1,
+      value: 1,
+      ease: "linear",
+      delay: 4,
+    });
+  }
+
   setupMaterials() {
     const textureLavaMatcap = this.textureLoader.load(MatcapOrangeLava);
     const textureToonGreenMatcap = this.textureLoader.load(MatcapGreenToon);
@@ -116,10 +132,19 @@ class Watch {
       uWatchHandleValue: { value: 1 },
       uTime: { value: 0 },
       uStep: { value: -2 },
-      uChangeY: { value: 2 },
+      uChangeXWatch: { value: 6 },
+      uChangeXBackground: { value: 1 },
+      uAlpha: { value: -15 },
+      uAlphaHandle: { value: 0 },
     };
 
     this.watchMaterial = new THREE.MeshMatcapMaterial({
+      matcap: textureLavaMatcap,
+      transparent: true,
+      side: THREE.DoubleSide,
+    });
+
+    this.backgroundMaterial = new THREE.MeshMatcapMaterial({
       matcap: textureLavaMatcap,
     });
 
@@ -128,8 +153,8 @@ class Watch {
       shader.uniforms.uMatcap1 = { value: textureLavaMatcap };
       shader.uniforms.uMatcap2 = { value: textureToonGreenMatcap };
       shader.uniforms.uTime = this.constWatchUniforms.uTime;
-      shader.uniforms.uStep = this.constWatchUniforms.uStep;
-      shader.uniforms.uChangeY = this.constWatchUniforms.uChangeY;
+      shader.uniforms.uChangeX = this.constWatchUniforms.uChangeXWatch;
+      shader.uniforms.uAlpha = this.constWatchUniforms.uAlpha;
 
       shader.vertexShader = shader.vertexShader.replace(
         "#include <common>",
@@ -161,7 +186,8 @@ class Watch {
         uniform float uWatchValue;
         uniform sampler2D uMatcap1;
         uniform sampler2D uMatcap2;
-        uniform float uChangeY;
+        uniform float uChangeX;
+        uniform float uAlpha;
         varying float vNoise;
         `
       );
@@ -171,9 +197,46 @@ class Watch {
         `
         vec4 matcapColor1 = texture2D( uMatcap1, uv);
         vec4 matcapColor2 = texture2D( uMatcap2, uv);
-        float posX = uPosition.x + (uChangeY);
+        float posX = uPosition.x + (uChangeX);
         posX = clamp(posX, 0.0, 1.0);
         vec4 matcapFinal = mix(matcapColor1, matcapColor2, posX );
+        matcapFinal.a = 0.5;
+        vec4 matcapColor = matcapFinal;
+        `
+      );
+
+      shader.fragmentShader = shader.fragmentShader.replace(
+        "#include <output_fragment>",
+        `#include <output_fragment>
+        gl_FragColor = vec4( outgoingLight, uPosition.y + uAlpha );
+        `
+      );
+    };
+
+    this.backgroundMaterial.onBeforeCompile = (shader) => {
+      shader.uniforms.uWatchValue = this.constWatchUniforms.uWatchValue;
+      shader.uniforms.uMatcap1 = { value: textureLavaMatcap };
+      shader.uniforms.uMatcap2 = { value: textureToonGreenMatcap };
+      shader.uniforms.uTime = this.constWatchUniforms.uTime;
+      shader.uniforms.uStep = this.constWatchUniforms.uStep;
+      shader.uniforms.uChangeX = this.constWatchUniforms.uChangeXBackground;
+
+      shader.fragmentShader = shader.fragmentShader.replace(
+        "#include <common>",
+        `#include <common>
+        uniform float uWatchValue;
+        uniform sampler2D uMatcap1;
+        uniform sampler2D uMatcap2;
+        uniform float uChangeX;
+        `
+      );
+
+      shader.fragmentShader = shader.fragmentShader.replace(
+        "vec4 matcapColor = texture2D( matcap, uv );",
+        `
+        vec4 matcapColor1 = texture2D( uMatcap1, uv);
+        vec4 matcapColor2 = texture2D( uMatcap2, uv);
+        vec4 matcapFinal = mix(matcapColor1, matcapColor2, uChangeX );
         vec4 matcapColor = matcapFinal;
         `
       );
@@ -187,26 +250,29 @@ class Watch {
     //   .name("step");
 
     // this.gui
-    //   .add(this.constWatchUniforms.uChangeY, "value")
-    //   .min(-2)
-    //   .max(2)
+    //   .add(this.constWatchUniforms.uAlpha, "value")
+    //   .min(-15)
+    //   .max(1)
     //   .step(0.01)
     //   .name("uChangeY");
 
     this.watchHandleMaterial = new THREE.MeshMatcapMaterial({
       matcap: textureLavaMatcap,
+      transparent: true,
     });
 
     this.watchHandleMaterial.onBeforeCompile = (shader) => {
       shader.uniforms.uWatchValue = this.constWatchUniforms.uWatchHandleValue;
       shader.uniforms.uMatcap1 = { value: textureRedMatcap };
       shader.uniforms.uMatcap2 = { value: textureGreyMatcap };
+      shader.uniforms.uAlpha = this.constWatchUniforms.uAlphaHandle;
       shader.fragmentShader = shader.fragmentShader.replace(
         "#include <common>",
         `#include <common>
         uniform float uWatchValue;
         uniform sampler2D uMatcap1;
         uniform sampler2D uMatcap2;
+        uniform float uAlpha;
         `
       );
 
@@ -219,6 +285,13 @@ class Watch {
         vec4 matcapColor = matcapFinal;
         `
       );
+
+      shader.fragmentShader = shader.fragmentShader.replace(
+        "#include <output_fragment>",
+        `#include <output_fragment>
+        gl_FragColor = vec4( outgoingLight, uAlpha );
+        `
+      );
     };
   }
 
@@ -226,7 +299,7 @@ class Watch {
     this.modelLoader.load(WatchModel, (glb) => {
       glb.scene.traverse((child) => {
         if (child instanceof THREE.Mesh) {
-          if (child.name == "Watch") {
+          if (child.name == "watch") {
             this.watch = child;
             this.shaderMat = new THREE.ShaderMaterial({
               uniforms: {
@@ -238,19 +311,17 @@ class Watch {
               fragmentShader: ShaderFragment,
               wireframe: false,
             });
-            // this.gui
-            //   .add(this.shaderMat.uniforms.uStep, "value")
-            //   .min(-1.2)
-            //   .max(1.2)
-            //   .step(0.01);
-
-            // this.gui
-            //   .add(this.shaderMat.uniforms.uChangeY, "value")
-            //   .min(-5)
-            //   .max(5)
-            //   .step(0.01)
-            //   .name("shaderUChangeY");
-
+            //   // this.gui
+            //   //   .add(this.shaderMat.uniforms.uStep, "value")
+            //   //   .min(-1.2)
+            //   //   .max(1.2)
+            //   //   .step(0.01);
+            //   // this.gui
+            //   //   .add(this.shaderMat.uniforms.uChangeY, "value")
+            //   //   .min(-5)
+            //   //   .max(5)
+            //   //   .step(0.01)
+            //   //   .name("shaderUChangeY");
             child.material = this.watchMaterial;
             this.groupObjects.push(child);
           } else if (child.name == "handleWatch1") {
@@ -259,16 +330,24 @@ class Watch {
           } else if (child.name == "handleWatch2") {
             this.watchHandle2 = child;
             this.watchHandle2.material = this.watchHandleMaterial;
+          } else if (child.name == "numbers") {
+            this.numbers = child;
+            this.numbers.material = this.watchHandleMaterial;
+          } else if ((child.name = "background")) {
+            this.background = child;
+            this.background.material = this.backgroundMaterial;
           }
         }
       });
-      //this.gui.add(this.watch.position, "y", -6, 3, 0.01);
-      this.watch.position.y = -4.5;
+      this.gui.add(this.watch.position, "y", -20, 3, 0.01);
+      this.gui.add(this.background.position, "y", -20, 3, 0.01);
+      this.watch.position.y = -5;
+      this.background.position.y = -5;
       this.watch.scale.normalize();
-      this.watch.scale.set(5, 5, 5);
-      this.scene.add(this.watch);
-      this.watchHandle2.rotation.z = -(Math.PI * 2) * (15 / 60);
-      this.watchHandle1.rotation.z = -(Math.PI * 2) * (0 + 60 / 60 / 12);
+      this.watch.scale.set(1, 1, 1);
+      this.background.scale.normalize();
+      this.background.scale.set(1, 1, 1);
+      this.scene.add(this.watch, this.background);
       this.isWatchLoaded = true;
     });
   }
@@ -276,14 +355,14 @@ class Watch {
   changeMaterial(isDarkMode) {
     if (this.isWatchLoaded) {
       if (isDarkMode) {
-        gsap.to(this.constWatchUniforms.uStep, {
-          duration: 1.5,
-          value: 2,
+        gsap.to(this.constWatchUniforms.uChangeXWatch, {
+          duration: 0.75,
+          value: -6,
           ease: "easeOut",
         });
-        gsap.to(this.constWatchUniforms.uChangeY, {
-          duration: 1.0,
-          value: -2,
+        gsap.to(this.constWatchUniforms.uChangeXBackground, {
+          duration: 1,
+          value: 0,
           ease: "easeOut",
         });
         gsap.to(this.constWatchUniforms.uWatchHandleValue, {
@@ -291,14 +370,14 @@ class Watch {
           value: 1,
         });
       } else {
-        gsap.to(this.constWatchUniforms.uStep, {
-          duration: 1.5,
-          value: -2,
+        gsap.to(this.constWatchUniforms.uChangeXWatch, {
+          duration: 0.75,
+          value: 6,
           ease: "easeOut",
         });
-        gsap.to(this.constWatchUniforms.uChangeY, {
-          duration: 1.0,
-          value: 2,
+        gsap.to(this.constWatchUniforms.uChangeXBackground, {
+          duration: 1,
+          value: 1,
           ease: "easeOut",
         });
         gsap.to(this.constWatchUniforms.uWatchHandleValue, {

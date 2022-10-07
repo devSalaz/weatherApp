@@ -71,6 +71,7 @@ const MainSection = ({ currentWeather, setIsCursorHover, isThreeLoaded }) => {
       </div>
 
       <div className="container-info">
+        <div className="blur-container"></div>
         <Swiper
           spaceBetween={50}
           slidesPerView={3}
